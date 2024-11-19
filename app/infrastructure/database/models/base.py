@@ -15,14 +15,9 @@ Base = declarative_base()
 metadata = Base.metadata
 
 
-class BaseModel(Base):
+class BaseWithDateOnly(Base):
     __abstract__ = True
 
-    id: Mapped[int] = mapped_column(
-        BigInteger,
-        autoincrement=True,
-        primary_key=True,
-    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(True),
         server_default=func.now(),
@@ -32,4 +27,14 @@ class BaseModel(Base):
         default=func.now(),
         onupdate=func.now(),
         server_default=func.now(),
+    )
+
+
+class BaseModel(BaseWithDateOnly):
+    __abstract__ = True
+
+    id: Mapped[int] = mapped_column(
+        BigInteger,
+        autoincrement=True,
+        primary_key=True,
     )

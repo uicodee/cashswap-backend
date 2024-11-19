@@ -1,6 +1,10 @@
 from pydantic_settings import BaseSettings
 
 
+class TgBot(BaseSettings):
+    token: str
+
+
 class DB(BaseSettings):
 
     host: str
@@ -24,6 +28,8 @@ class SettingsExtractor(BaseSettings):
 
     API__SECRET: str
 
+    BOT__TOKEN: str
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
@@ -32,6 +38,7 @@ class SettingsExtractor(BaseSettings):
 class Settings(BaseSettings):
     db: DB
     api: Api
+    tgbot: TgBot
 
 
 def load_config() -> Settings:
@@ -46,4 +53,5 @@ def load_config() -> Settings:
             password=settings.DB__PASSWORD,
         ),
         api=Api(secret=settings.API__SECRET),
+        tgbot=TgBot(token=settings.BOT__TOKEN),
     )
