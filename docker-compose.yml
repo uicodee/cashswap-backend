@@ -7,3 +7,10 @@ services:
     container_name: "api"
     ports:
       - "8000:15400"
+
+  tgbot:
+    network_mode: host
+    build: .
+    command: poetry run python -m app.tgbot
+    restart: always
+    container_name: "cashcoin-tgbot"
