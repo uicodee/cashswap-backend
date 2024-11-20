@@ -4,14 +4,14 @@ from pydantic import PositiveInt
 
 from app import dto
 from app.api import schems
-from app.api.dependencies import dao_provider
+from app.api.dependencies import dao_provider, get_user
 from app.infrastructure.database import HolderDao
 
 router = APIRouter(prefix="/task-category")
 
 
 @router.post(
-    path="/", response_model=dto.TaskCategory, description="Create a task category"
+    path="/", response_model=dto.TaskCategory, description="Create a task category", dependencies=[Depends(get_user)]
 )
 async def create_task_category(
     task_category: schems.TaskCategory, dao: HolderDao = Depends(dao_provider)
@@ -41,7 +41,7 @@ async def get_task_category(
 @router.put(
     path="/{task_category_id}",
     response_model=dto.TaskCategory,
-    description="Update task category",
+    description="Update task category", dependencies=[Depends(get_user)]
 )
 async def update_task_category(
     task_category_id: PositiveInt = Path(),
@@ -51,6 +51,6 @@ async def update_task_category(
 @router.delete(
     path="/{task_category_id}",
     response_model=dto.TaskCategory,
-    description="Delete task category",
+    description="Delete task category", dependencies=[Depends(get_user)]
 )
 async def delete_task_category(task_category_id: PositiveInt = Path()): ...

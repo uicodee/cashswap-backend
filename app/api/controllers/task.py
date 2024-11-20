@@ -5,15 +5,15 @@ from pydantic import PositiveInt
 
 from app import dto
 from app.api import schems
-from app.api.dependencies import dao_provider, get_telegram_user
+from app.api.dependencies import dao_provider, get_telegram_user, get_user
 from app.infrastructure.database import HolderDao
 
 router = APIRouter(prefix="/task")
 
 
-@router.post(path="/", response_model=dto.Task, description="Create a task")
+@router.post(path="/", response_model=dto.Task, description="Create a task", dependencies=[Depends(get_user)])
 async def create_task(
-    task: schems.Task, dao: HolderDao = Depends(dao_provider)
+        task: schems.Task, dao: HolderDao = Depends(dao_provider)
 ) -> dto.Task:
     return await dao.task.create(task=task)
 
@@ -27,13 +27,12 @@ async def get_tasks(dao: HolderDao = Depends(dao_provider)) -> list[dto.Task]:
     path="/user-tasks", response_model=list[dto.Task], description="Get user tasks"
 )
 async def get_user_tasks(
-    telegram_user: dto.TelegramUser = Depends(get_telegram_user),
-    dao: HolderDao = Depends(dao_provider),
+        telegram_user: dto.TelegramUser = Depends(get_telegram_user),
+        dao: HolderDao = Depends(dao_provider),
 ) -> list[dto.Task]:
     tasks_ids = await dao.task.get_completed_tasks(
         telegram_user_id=telegram_user.telegram_id
     )
-    print(tasks_ids)
     tasks = await dao.task.get_all()
     user_tasks = []
     for task in tasks:
@@ -44,9 +43,9 @@ async def get_user_tasks(
 
 @router.post(path="/check/{task_id}", description="Get task status")
 async def get_task_status(
-    task_id: PositiveInt = Path(),
-    telegram_user: dto.TelegramUser = Depends(get_telegram_user),
-    dao: HolderDao = Depends(dao_provider),
+        task_id: PositiveInt = Path(),
+        telegram_user: dto.TelegramUser = Depends(get_telegram_user),
+        dao: HolderDao = Depends(dao_provider),
 ) -> JSONResponse:
     tasks_ids = await dao.task.get_completed_tasks(
         telegram_user_id=telegram_user.telegram_id
@@ -75,7 +74,7 @@ async def get_task_status(
 
 @router.get(path="/{task_id}", response_model=dto.Task, description="Get single task")
 async def get_task(
-    dao: HolderDao = Depends(dao_provider), task_id: PositiveInt = Path()
+        dao: HolderDao = Depends(dao_provider), task_id: PositiveInt = Path()
 ) -> dto.Task:
     current_task = await dao.task.get_one(task_id=task_id)
     if current_task is None:
@@ -85,11 +84,11 @@ async def get_task(
     return current_task
 
 
-@router.put(path="/{task_id}", response_model=dto.Task, description="Update task")
+@router.put(path="/{task_id}", response_model=dto.Task, description="Update task", dependencies=[Depends(get_user)])
 async def update_task(
-    task: schems.Task,
-    dao: HolderDao = Depends(dao_provider),
-    task_id: PositiveInt = Path(),
+        task: schems.Task,
+        dao: HolderDao = Depends(dao_provider),
+        task_id: PositiveInt = Path(),
 ) -> dto.Task:
     current_task = await dao.task.get_one(task_id=task_id)
     if current_task is None:
@@ -99,9 +98,9 @@ async def update_task(
     return await dao.task.update_one(task_id=task_id, task=task)
 
 
-@router.delete(path="/{task_id}", description="Delete task")
+@router.delete(path="/{task_id}", description="Delete task", dependencies=[Depends(get_user)])
 async def delete_task(
-    task_id: PositiveInt = Path(), dao: HolderDao = Depends(dao_provider)
+        task_id: PositiveInt = Path(), dao: HolderDao = Depends(dao_provider)
 ):
     current_task = await dao.task.get_one(task_id=task_id)
     if current_task is None:

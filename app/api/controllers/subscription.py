@@ -4,14 +4,14 @@ from pydantic import PositiveInt
 
 from app import dto
 from app.api import schems
-from app.api.dependencies import dao_provider
+from app.api.dependencies import dao_provider, get_user
 from app.infrastructure.database import HolderDao
 
 router = APIRouter(prefix="/subscription")
 
 
 @router.post(
-    path="/", response_model=dto.Subscription, description="Create a subscription"
+    path="/", response_model=dto.Subscription, description="Create a subscription", dependencies=[Depends(get_user)]
 )
 async def create_subscription(
     subscription: schems.Subscription, dao: HolderDao = Depends(dao_provider)
@@ -47,7 +47,7 @@ async def get_subscription(
 @router.put(
     path="/{subscription_id}",
     response_model=dto.Subscription,
-    description="Update subscription",
+    description="Update subscription", dependencies=[Depends(get_user)]
 )
 async def update_subscription(
     subscription: schems.Subscription,
@@ -68,7 +68,7 @@ async def update_subscription(
 
 @router.delete(
     path="/{subscription_id}",
-    description="Delete subscription",
+    description="Delete subscription", dependencies=[Depends(get_user)]
 )
 async def delete_subscription(
     dao: HolderDao = Depends(dao_provider), subscription_id: PositiveInt = Path()

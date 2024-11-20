@@ -11,8 +11,8 @@ class UserDAO(BaseDAO[User]):
     def __init__(self, session: AsyncSession):
         super().__init__(User, session)
 
-    async def add_user(self, user: schems.User) -> dto.User:
-        user = User(**user.dict())
+    async def add_user(self, firstname: str, lastname: str, email: str, password: str) -> dto.User:
+        user = User(firstname=firstname, lastname=lastname, email=email, password=password)
         self.session.add(user)
         await self.session.commit()
         return dto.User.from_orm(user)

@@ -25,8 +25,8 @@ async def get_all(dao: HolderDao = Depends(dao_provider)) -> list[dto.TelegramUs
     description="Get telegram user referrals",
 )
 async def get_all_referrals(
-    telegram_user: dto.TelegramUser = Depends(get_telegram_user),
-    dao: HolderDao = Depends(dao_provider),
+        telegram_user: dto.TelegramUser = Depends(get_telegram_user),
+        dao: HolderDao = Depends(dao_provider),
 ) -> list[dto.TelegramUser]:
     return await dao.telegram_user.get_all_referrals(
         telegram_id=telegram_user.telegram_id
@@ -39,7 +39,7 @@ async def get_all_referrals(
     description="Get telegram user referrals",
 )
 async def get_all_referrals_by_id(
-    telegram_id: PositiveInt = Path(), dao: HolderDao = Depends(dao_provider)
+        telegram_id: PositiveInt = Path(), dao: HolderDao = Depends(dao_provider)
 ) -> list[dto.TelegramUser]:
     return await dao.telegram_user.get_all_referrals(telegram_id=telegram_id)
 
@@ -50,9 +50,9 @@ async def get_all_referrals_by_id(
     description="Update telegram user",
 )
 async def update_telegram_user(
-    telegram_user: schems.UpdateTelegramUser,
-    telegram_id: PositiveInt = Path(),
-    dao: HolderDao = Depends(dao_provider),
+        telegram_user: schems.UpdateTelegramUser,
+        telegram_id: PositiveInt = Path(),
+        dao: HolderDao = Depends(dao_provider),
 ) -> dto.TelegramUser:
     return await dao.telegram_user.update_one(
         telegram_id=telegram_id, telegram_user=telegram_user
@@ -61,8 +61,8 @@ async def update_telegram_user(
 
 @router.post(path="/claim-daily", response_model=dto.TelegramUser, description="Claim")
 async def claim_daily_earning(
-    telegram_user: dto.TelegramUser = Depends(get_telegram_user),
-    dao: HolderDao = Depends(dao_provider),
+        telegram_user: dto.TelegramUser = Depends(get_telegram_user),
+        dao: HolderDao = Depends(dao_provider),
 ) -> dto.TelegramUser:
     current_time = datetime.now(moscow_tz)
     if telegram_user.last_daily_reward:
@@ -85,8 +85,8 @@ async def claim_daily_earning(
 
 @router.post(path="/claim", response_model=dto.TelegramUser, description="Claim")
 async def claim_earning(
-    telegram_user: dto.TelegramUser = Depends(get_telegram_user),
-    dao: HolderDao = Depends(dao_provider),
+        telegram_user: dto.TelegramUser = Depends(get_telegram_user),
+        dao: HolderDao = Depends(dao_provider),
 ) -> dto.TelegramUser:
     current_time = datetime.now(moscow_tz)
     if current_time <= telegram_user.next_farm.astimezone(moscow_tz):
@@ -117,7 +117,7 @@ async def claim_earning(
 
 @router.get(path="/get-me", response_model=dto.TelegramUser, description="Get me")
 async def get_me(
-    telegram_user: dto.TelegramUser = Depends(get_telegram_user),
+        telegram_user: dto.TelegramUser = Depends(get_telegram_user),
 ) -> dto.TelegramUser:
     max_farm_per_hour = 100 / 8
 
@@ -146,8 +146,8 @@ async def get_me(
 
 @router.get(path="/rating", response_model=dto.Rating, description="Get rating")
 async def get_rating(
-    telegram_user: dto.TelegramUser = Depends(get_telegram_user),
-    dao: HolderDao = Depends(dao_provider),
+        telegram_user: dto.TelegramUser = Depends(get_telegram_user),
+        dao: HolderDao = Depends(dao_provider),
 ) -> dto.Rating:
     place = await dao.telegram_user.get_user_rank(telegram_id=telegram_user.telegram_id)
     return dto.Rating(place=place)
@@ -159,6 +159,6 @@ async def get_rating(
     description="Get leaderboard",
 )
 async def get_leaderboard(
-    dao: HolderDao = Depends(dao_provider),
+        dao: HolderDao = Depends(dao_provider),
 ) -> list[dto.TelegramUser]:
     return await dao.telegram_user.get_users_by_rank()
