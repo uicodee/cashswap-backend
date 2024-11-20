@@ -112,7 +112,7 @@ async def delete_task(
         tasks: schems.DeleteTask,
         dao: HolderDao = Depends(dao_provider)
 ):
-    for task in tasks:
+    for task in tasks.task_ids:
         current_task = await dao.task.get_one(task_id=task)
         if current_task is None:
             raise HTTPException(

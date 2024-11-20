@@ -9,4 +9,4 @@ class Task(BaseModel):
 
 
 class DeleteTask(BaseModel):
-    skills_ids: list[PositiveInt] = Field(alias="taskIds")
+    task_ids: list[PositiveInt] = Field(alias="taskIds")
