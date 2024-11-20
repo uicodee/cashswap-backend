@@ -1,4 +1,4 @@
-from sqlalchemy import String, Numeric, ForeignKey
+from sqlalchemy import String, Numeric, ForeignKey, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.infrastructure.database.models import BaseModel
@@ -14,6 +14,7 @@ class Task(BaseModel):
     title: Mapped[str] = mapped_column(String)
     reward: Mapped[float] = mapped_column(Numeric)
     link: Mapped[str] = mapped_column(String)
+    chat_id: Mapped[int] = mapped_column(BigInteger)
 
     category_id: Mapped[int] = mapped_column(
         ForeignKey("task_category.id", ondelete="CASCADE")
