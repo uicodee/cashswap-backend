@@ -1,3 +1,4 @@
+from aiogram import Bot
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.params import Path
@@ -5,7 +6,7 @@ from pydantic import PositiveInt
 
 from app import dto
 from app.api import schems
-from app.api.dependencies import dao_provider, get_telegram_user, get_user
+from app.api.dependencies import dao_provider, get_telegram_user, get_user, get_bot
 from app.infrastructure.database import HolderDao
 
 router = APIRouter(prefix="/task")
@@ -44,6 +45,7 @@ async def get_user_tasks(
 @router.post(path="/check/{task_id}", description="Get task status")
 async def get_task_status(
         task_id: PositiveInt = Path(),
+        bot: Bot = Depends(get_bot),
         telegram_user: dto.TelegramUser = Depends(get_telegram_user),
         dao: HolderDao = Depends(dao_provider),
 ) -> JSONResponse:
@@ -58,9 +60,16 @@ async def get_task_status(
             task_category_id=task.category.id
         )
         if task_category.name == "Telegram":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="Task is not completed"
+            current_status = await bot.get_chat_member(
+                chat_id=task.link,
+                user_id=telegram_user.telegram_id
             )
+            if current_status.status == "left":
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST, detail="Task is not completed"
+                )
+            else:
+                return JSONResponse(status_code=200, content={"status": "Success"})
         else:
             await dao.telegram_user.update_user_balance(
                 telegram_id=telegram_user.telegram_id,

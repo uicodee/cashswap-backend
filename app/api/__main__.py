@@ -1,4 +1,5 @@
 import uvicorn as uvicorn
+from aiogram import Bot
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -9,6 +10,7 @@ from app.infrastructure.database.factory import create_pool, make_connection_str
 
 def main() -> FastAPI:
     settings = load_config()
+    bot = Bot(token=settings.tgbot.token)
     app = FastAPI(docs_url="/docs", version="1.0.0")
     pool = create_pool(url=make_connection_string(settings=settings))
     app.add_middleware(
@@ -18,7 +20,7 @@ def main() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    dependencies.setup(app, pool, settings)
+    dependencies.setup(app, pool, settings, bot)
     controllers.setup(app)
     return app
 
