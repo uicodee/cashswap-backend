@@ -107,13 +107,15 @@ async def update_task(
     return await dao.task.update_one(task_id=task_id, task=task)
 
 
-@router.delete(path="/{task_id}", description="Delete task", dependencies=[Depends(get_user)])
+@router.delete(path="/", description="Delete task", dependencies=[Depends(get_user)])
 async def delete_task(
-        task_id: PositiveInt = Path(), dao: HolderDao = Depends(dao_provider)
+        tasks: schems.DeleteTask,
+        dao: HolderDao = Depends(dao_provider)
 ):
-    current_task = await dao.task.get_one(task_id=task_id)
-    if current_task is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"
-        )
-    await dao.task.delete_one(task_id=task_id)
+    for task in tasks:
+        current_task = await dao.task.get_one(task_id=task)
+        if current_task is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"
+            )
+        await dao.task.delete_one(task_id=task)
