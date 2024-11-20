@@ -61,7 +61,7 @@ async def get_task_status(
         )
         if task_category.name == "Telegram":
             current_status = await bot.get_chat_member(
-                chat_id=task.link,
+                chat_id=task.chat_id,
                 user_id=telegram_user.telegram_id
             )
             if current_status.status == "left":
@@ -69,6 +69,13 @@ async def get_task_status(
                     status_code=status.HTTP_400_BAD_REQUEST, detail="Task is not completed"
                 )
             else:
+                await dao.telegram_user.update_user_balance(
+                    telegram_id=telegram_user.telegram_id,
+                    balance=telegram_user.balance + task.reward,
+                )
+                await dao.task.create_completed_task(
+                    task_id=task_id, telegram_user_id=telegram_user.telegram_id
+                )
                 return JSONResponse(status_code=200, content={"status": "Success"})
         else:
             await dao.telegram_user.update_user_balance(
