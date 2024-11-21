@@ -13,7 +13,7 @@ async def cmd_start(message: types.Message) -> None:
     builder = InlineKeyboardBuilder()
     builder.button(
         text="Join community",
-        url="https://t.me/cashcoin_crypto"
+        url="https://t.me/cashcoin_eng"
     )
     builder.button(
         text="Play",

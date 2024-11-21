@@ -1,6 +1,7 @@
 from datetime import timedelta, datetime, timezone
 
 from fastapi import APIRouter, Depends, Path, HTTPException, status
+from fastapi.responses import JSONResponse
 from pydantic import PositiveInt
 
 from app import dto
@@ -74,11 +75,11 @@ async def claim_daily_earning(
         telegram_id=telegram_user.telegram_id, last_daily_reward=current_time
     )
     await dao.telegram_user.update_user_balance(
-        telegram_id=telegram_user.telegram_id, balance=telegram_user.days_active * 50
+        telegram_id=telegram_user.telegram_id, balance=telegram_user.balance + telegram_user.days_active * 50
     )
     updated_user = await dao.telegram_user.update_user_tickets(
         telegram_id=telegram_user.telegram_id,
-        tickets=telegram_user.days_active * 1 if telegram_user.days_active < 5 else 5,
+        tickets=telegram_user.tickets + telegram_user.days_active * 1 if telegram_user.days_active < 5 else 5,
     )
     return updated_user
 
@@ -113,6 +114,28 @@ async def claim_earning(
                 extra_balance=telegram_user.extra_balance + 2.5,
             )
     return current_user
+
+
+@router.post(path="/claim-extra", response_model=dto.TelegramUser, description="Claim")
+async def claim_extra_earning(
+        telegram_user: dto.TelegramUser = Depends(get_telegram_user),
+        dao: HolderDao = Depends(dao_provider),
+) -> dto.TelegramUser:
+    if telegram_user.extra_balance > 0:
+        await dao.telegram_user.update_user_balance(
+            telegram_id=telegram_user.telegram_id,
+            balance=telegram_user.balance + telegram_user.extra_balance
+        )
+        await dao.telegram_user.update_user_extra_balance(
+            telegram_id=telegram_user.telegram_id,
+            extra_balance=0
+        )
+        return telegram_user
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No extra balance"
+        )
 
 
 @router.get(path="/get-me", response_model=dto.TelegramUser, description="Get me")
