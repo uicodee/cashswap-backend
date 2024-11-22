@@ -106,12 +106,15 @@ async def claim_earning(
         )
         await dao.telegram_user.update_user_extra_balance(
             telegram_id=telegram_user.referrer_id,
-            extra_balance=telegram_user.extra_balance + 10,
+            extra_balance=referrer.extra_balance + 10,
         )
         if referrer.referrer_id is not None:
+            referrer_referrer = await dao.telegram_user.get_telegram_user(
+                telegram_id=referrer.referrer_id
+            )
             await dao.telegram_user.update_user_extra_balance(
                 telegram_id=referrer.referrer_id,
-                extra_balance=telegram_user.extra_balance + 2.5,
+                extra_balance=referrer_referrer.extra_balance + 2.5,
             )
     return current_user
 
