@@ -6,7 +6,7 @@ from app.dto import BaseWithDateOnly
 
 class TelegramUser(BaseWithDateOnly):
     telegram_id: int = Field(alias="telegramId")
-    username: str = Field()
+    username: str | None = Field(default=None)
     first_name: str = Field(alias="firstName")
     last_name: str = Field(alias="lastName")
     balance: float = Field()
